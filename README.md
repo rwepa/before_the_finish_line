@@ -30,4 +30,9 @@ ISBN: 9786260162306 (電子書)
 
 https://rwepa.github.io/before_the_finish_line/
 
+# QR code
+
+![image](https://github.com/rwepa/before_the_finish_line/blob/main/images/before_the_finish_line_qrcode.png)
+
+
 
