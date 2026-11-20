@@ -2,6 +2,8 @@
 
 ![image](https://github.com/rwepa/before_the_finish_line/blob/main/images/before_the_finish_line_qrcode.png)
 
+![image](https://github.com/rwepa/before_the_finish_line/blob/main/images/before_the_finish_line_en_qrcode.png)
+
 書名: 終點之前 2.0 - 如何活出不後悔的人生
 
 作者: 黃惠民 (Wee Hui Ming)
@@ -31,3 +33,7 @@ ISBN: 9786260162306 (電子書)
 # MP3_中文版 
 
 https://rwepa.github.io/before_the_finish_line/
+
+# MP3_英文版
+
+https://rwepa.github.io/before_the_finish_line/?lang=en
