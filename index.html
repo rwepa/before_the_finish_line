@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f9fc">
+  <title>終點之前 2.0</title>
+  <style>
+    :root { color-scheme: light; --ink:#253349; --muted:#62748a; --blue:#2563eb; --border:#dce5f1; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; display:grid; place-items:center; padding:28px 16px; background:linear-gradient(150deg,#f7f9fc 0%,#edf5ff 55%,#fff8ec 100%); color:var(--ink); font-family:system-ui,'Microsoft JhengHei',sans-serif; line-height:1.55; }
+    main { width:min(100%,620px); padding:32px; border:1px solid #e4eaf2; border-radius:24px; background:#fff; box-shadow:0 20px 55px rgba(45,73,115,.1); }
+    .language-nav { display:flex; justify-content:flex-end; align-items:center; gap:7px; margin:-7px 0 20px; font-size:.9rem; }
+    .language-nav a { display:inline-block; padding:6px 12px; border:1px solid var(--border); border-radius:999px; text-decoration:none; color:#31547f; background:#f7faff; }
+    .language-nav a:hover { background:#eaf2ff; }
+    .language-nav a.active { background:#2563eb; border-color:#2563eb; color:white; font-weight:700; }
+    h1 { margin:0 0 10px; font-size:1.85rem; text-align:center; color:#20365b; }
+    .sub { text-align:center; color:var(--muted); margin:0 0 9px; overflow-wrap:anywhere; }
+    .cover { width:136px; height:136px; margin:22px auto 17px; border-radius:24px; background:linear-gradient(135deg,#dceaff,#e4dcff); color:#3563aa; display:grid; place-items:center; font-size:66px; box-shadow:0 10px 25px #4466a01a; }
+    #songTitle { text-align:center; font-size:1.17rem; font-weight:700; margin:0 0 15px; }
+    #seek { width:100%; accent-color:var(--blue); cursor:pointer; }
+    .times { display:flex; justify-content:space-between; color:var(--muted); font-size:.85rem; }
+    .controls { display:flex; align-items:center; justify-content:center; gap:16px; margin:16px 0 20px; }
+    button { cursor:pointer; color:#2b4e83; border:1px solid #cddcf1; background:#f3f7ff; border-radius:999px; padding:10px 18px; font-size:1.08rem; transition:background .15s,transform .15s; }
+    button:hover { background:#e2edff; }
+    button:focus-visible, input:focus-visible, a:focus-visible { outline:3px solid #87b5ff; outline-offset:3px; }
+    #play { background:var(--blue); border-color:var(--blue); color:white; font-size:1.4rem; min-width:64px; min-height:64px; box-shadow:0 6px 16px #2563eb38; }
+    #play:hover { background:#1d4ed8; }
+    .volume { display:flex; gap:10px; align-items:center; color:#506580; }
+    .volume input { flex:1; accent-color:var(--blue); }
+    h2 { font-size:1.08rem; margin:28px 0 12px; color:#243d62; }
+    #playlist { list-style:none; margin:0; padding:0; display:grid; gap:9px; }
+    #playlist button { display:flex; text-align:left; align-items:center; gap:12px; border-radius:12px; width:100%; font-size:1rem; background:#f9fbfe; color:var(--ink); border:1px solid var(--border); padding:12px 14px; line-height:1.5; }
+    #playlist button:hover { background:#eff6ff; border-color:#a8c8f8; }
+    .track-number { color:#6882a4; min-width:28px; font-weight:700; }
+    #playlist button.active { background:#e6f0ff; border-color:#78aafa; color:#174992; font-weight:650; }
+    #playlist button.active .track-number { color:#174992; }
+    #message { min-height:1.5em; color:#ad5214; font-size:.9rem; }
+    footer { text-align:center; color:#6b7b90; font-size:.83rem; margin-top:22px; }
+    a { color:#245bbb; text-underline-offset:3px; }
+    @media(max-width:480px) { body { padding:12px; } main { padding:22px 18px; border-radius:18px; } h1 { font-size:1.6rem; } .cover { width:116px; height:116px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <nav class="language-nav" aria-label="語言選擇 / Language selection">
+      <a href="?lang=zh" id="langZh" hreflang="zh-Hant">中文版</a>
+      <a href="?lang=en" id="langEn" hreflang="en">English</a>
+    </nav>
+    <h1 id="pageHeading">🎵 終點之前 2.0</h1>
+    <p class="sub" id="bookName">書名: 終點之前 2.0 - 如何活出不後悔的人生</p>
+    <p class="sub" id="author">作者: 黃惠民 (Wee Hui Ming), Email: weehm@cycu.edu.tw</p>
+    <p class="sub">https://rwepa.github.io/before_the_finish_line/</p>
+    <p class="sub" id="copyright">版權所有© 2026 黃惠民 (Wee Hui Ming)</p>
+    <div class="cover" aria-hidden="true">♫</div>
+    <p id="songTitle">準備播放</p>
+    <audio id="audio" preload="metadata"></audio>
+    <label for="seek" id="seekLabel">播放進度</label>
+    <input id="seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="播放進度">
+    <div class="times"><span id="currentTime">0:00</span><span id="duration">0:00</span></div>
+    <div class="controls">
+      <button id="prev" type="button" aria-label="上一首">⏮</button>
+      <button id="play" type="button" aria-label="播放">▶</button>
+      <button id="next" type="button" aria-label="下一首">⏭</button>
+    </div>
+    <div class="volume"><label for="volume" id="volumeLabel">🔊 音量</label><input id="volume" type="range" min="0" max="1" step="0.05" value="0.8"></div>
+    <h2 id="playlistHeading">播放清單</h2>
+    <ul id="playlist"></ul>
+    <p id="message" role="status"></p>
+    <footer><span id="footerText">Powered by:</span>
+      <a href="https://www.youtube.com/@alan9956" target="_blank" rel="noopener noreferrer" id="youtubeLink">RWEPA(小明)教學頻道</a>
+    </footer>
+  </main>
+  <script>
+    // 中文：mp3_music / 英文：mp3_music_en
+    // 中文版：10 章（chapter01 ~ chapter10）；英文版：序言 + 10 章（共 11 首）。
+    const chapters = [
+      { zh:'第1章 何謂圓滿結局', en:'Chapter 1 What Does Before the Finish Line Mean? ' },
+      { zh:'第2章 從圓滿與未圓滿結局者的教訓', en:'Chapter 2 Lessons from the Bible: Those Who Did and Did Not Finish Well' },
+      { zh:'第3章 精於圓滿結局的人生智慧', en:'Chapter 3 The Wisdom of a Life Well Lived ' },
+      { zh:'第4章 多面向人生旅程:設定心靈界線', en:'Chapter 4 A Multi-Faceted Life Journey: Setting Boundaries for Our Soul' },
+      { zh:'第5章 保護我們免受敵人侵害的策略', en:'Chapter 5 Strategies to Protect Us from Enemies' },
+      { zh:'第6章 圓滿結局五個標誌及屬靈資產', en:'Chapter 6 Five Marks of a Life Well-Lived and the Legacy Question' },
+      { zh:'第7章 圓滿結局的秘訣', en:'Chapter 7 The Secret to Finishing Well' },
+      { zh:'第8章 以神為中心的敬拜', en:'Chapter 8 God-Centred Worship' },
+      { zh:'第9章 創造改變-在校園留下生命足跡', en:'Chapter 9 Making a Difference: Building a Lasting Legacy on Campus' },
+      { zh:'第10章 學生生命故事分享', en:'Chapter 10 Testimonies by former students ' }
+    ];
+    const lang = new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'zh';
+    const i18n = {
+      zh: {
+        heading:'🎵 終點之前 2.0', book:'書名: 終點之前 2.0 - 如何活出不後悔的人生',
+        author:'作者: 黃惠民 (Wee Hui Ming), Email: weehm@cycu.edu.tw',
+        copyright:'版權所有© 2026 黃惠民 (Wee Hui Ming)', ready:'準備播放',
+        seek:'播放進度', volume:'🔊 音量', playlist:'播放清單',
+        play:'播放', pause:'暫停', prev:'上一首', next:'下一首',
+        track:'播放 ', error:'無法播放：請確認 MP3 檔案路徑與格式，並點擊播放鍵重試。',
+        fileError:'音檔讀取失敗：請確認檔案已上傳：',
+        footer:'Powered by: ', channel:'RWEPA(小明)教學頻道'
+      },
+      en: {
+        heading:'🎵 Before the Finish Line 2.0', book:'Book: Before the Finish Line 2.0',
+        author:'Author: Wee Hui Ming (黃惠民), Email: weehm@cycu.edu.tw',
+        copyright:'Copyright © 2026 Wee Hui Ming (黃惠民). All rights reserved.', ready:'Ready to play',
+        seek:'Playback progress', volume:'🔊 Volume', playlist:'Playlist',
+        play:'Play', pause:'Pause', prev:'Previous track', next:'Next track',
+        track:'Play ', error:'Unable to play. Check the MP3 file path and format, then try again.',
+        fileError:'Audio file could not be loaded. Check that this file is uploaded: ',
+        footer:'Powered by: ', channel:'RWEPA Tutorial Channel'
+      }
+    };
+    const t = i18n[lang];
+    const chapterSongs = chapters.map((chapter, i) => ({
+      title: chapter[lang],
+      file: `${lang === 'en' ? 'mp3_music_en' : 'mp3_music'}/before_the_finish_line_chapter${String(i + 1).padStart(2, '0')}.mp3`
+    }));
+    // 英文版在第 1 首加入序言；中文版仍只有 10 個章節。
+    const songs = lang === 'en'
+      ? [{ title: 'Preface', file: 'mp3_music_en/before_the_finish_line_00preface.mp3' }, ...chapterSongs]
+      : chapterSongs;
+    document.documentElement.lang = lang==='en' ? 'en' : 'zh-Hant';
+    document.title = lang==='en' ? 'Before the Finish Line 2.0' : '終點之前 2.0';
+    document.getElementById('pageHeading').textContent=t.heading;
+    document.getElementById('bookName').textContent=t.book;
+    document.getElementById('author').textContent=t.author;
+    document.getElementById('copyright').textContent=t.copyright;
+    document.getElementById('seekLabel').textContent=t.seek;
+    document.getElementById('seek').setAttribute('aria-label',t.seek);
+    document.getElementById('volumeLabel').textContent=t.volume;
+    document.getElementById('playlistHeading').textContent=t.playlist;
+    document.getElementById('footerText').textContent=t.footer;
+    document.getElementById('youtubeLink').textContent=t.channel;
+    document.getElementById('prev').setAttribute('aria-label',t.prev);
+    document.getElementById('next').setAttribute('aria-label',t.next);
+    for(const code of ['zh','en']) {
+      const link=document.getElementById(code==='zh'?'langZh':'langEn');
+      if(code===lang){ link.classList.add('active'); link.setAttribute('aria-current','page'); }
+    }
+    const audio = document.getElementById('audio');
+    const title = document.getElementById('songTitle');
+    const list = document.getElementById('playlist');
+    const playBtn = document.getElementById('play');
+    const seek = document.getElementById('seek');
+    const message = document.getElementById('message');
+    let current = 0;
+    const format = seconds => Number.isFinite(seconds) ? `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2,'0')}` : '0:00';
+    function renderList(){
+      list.replaceChildren();
+      songs.forEach((song,i)=>{
+        const li=document.createElement('li');
+        const button=document.createElement('button');
+        button.type='button';
+        button.className=i===current?'active':'';
+        button.setAttribute('aria-label',`${t.track}${song.title}`);
+        const number=document.createElement('span');
+        number.className='track-number'; number.textContent=lang==='en' ? String(i).padStart(2,'0') : String(i+1).padStart(2,'0');
+        const label=document.createElement('span'); label.textContent=song.title;
+        button.append(number,label);
+        button.addEventListener('click',()=>loadSong(i,true));
+        li.append(button);list.append(li);
+      });
+    }
+    async function start(){
+      try{message.textContent='';await audio.play();}
+      catch(e){message.textContent=t.error;}
+    }
+    function loadSong(index,autoplay=false){
+      current=(index+songs.length)%songs.length;
+      audio.src=songs[current].file;
+      title.textContent=songs[current].title;
+      seek.value=0;
+      document.getElementById('currentTime').textContent='0:00';
+      document.getElementById('duration').textContent='0:00';
+      message.textContent='';renderList();
+      if(autoplay)start();
+    }
+    playBtn.addEventListener('click',()=>audio.paused?start():audio.pause());
+    document.getElementById('prev').addEventListener('click',()=>loadSong(current-1,true));
+    document.getElementById('next').addEventListener('click',()=>loadSong(current+1,true));
+    audio.addEventListener('play',()=>{playBtn.textContent='⏸';playBtn.setAttribute('aria-label',t.pause);});
+    audio.addEventListener('pause',()=>{playBtn.textContent='▶';playBtn.setAttribute('aria-label',t.play);});
+    audio.addEventListener('loadedmetadata',()=>{document.getElementById('duration').textContent=format(audio.duration);});
+    audio.addEventListener('timeupdate',()=>{document.getElementById('currentTime').textContent=format(audio.currentTime);if(Number.isFinite(audio.duration)&&audio.duration>0)seek.value=100*audio.currentTime/audio.duration;});
+    seek.addEventListener('input',()=>{if(Number.isFinite(audio.duration)&&audio.duration>0)audio.currentTime=audio.duration*Number(seek.value)/100;});
+    document.getElementById('volume').addEventListener('input',e=>audio.volume=Number(e.target.value));
+    audio.addEventListener('ended',()=>loadSong(current+1,true));
+    audio.addEventListener('error',()=>{message.textContent=t.fileError+songs[current].file;});
+    audio.volume=0.8;
+    loadSong(0);
+  </script>
+</body>
+</html>
